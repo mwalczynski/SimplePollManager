@@ -5,14 +5,15 @@ namespace SimplePollManager.Api
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using SimplePollManager.Api.Infrastructure.Filters;
-    using SimplePollManager.Core;
-    using SimplePollManager.Core.Extensions;
-    using SimplePollManager.Database;
+    using SimplePollManager.Api.Filters;
+    using SimplePollManager.Api.Services;
+    using SimplePollManager.Application.Common.Extensions;
+    using SimplePollManager.Application.Common.Interfaces;
+    using SimplePollManager.Domain.Extensions;
+    using SimplePollManager.Infrastructure.Extensions;
 
     public class Startup
     {
@@ -30,23 +31,20 @@ namespace SimplePollManager.Api
                 .AddRouting(options => options.LowercaseUrls = true)
                 .AddMvcCore(options =>
                 {
-                    options.Filters.Add<HttpGlobalExceptionFilter>();
+                    options.Filters.Add<ApiExceptionFilter>();
                     options.Filters.Add<ValidateModelStateFilter>();
                 })
                 .AddApiExplorer()
                 .AddDataAnnotations()
                 .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            services.AddHealthChecks()
-                .AddSqlServer(this.configuration.GetConnectionString("MsSqlDb"));
-
             services.AddSwaggerGen();
 
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-            services.AddDbContextPool<PollContext>(options => options.UseSqlServer(this.configuration.GetConnectionString("MsSqlDb")));
-            services.AddScoped<IPollContext, PollContext>();
-
-            services.AddCoreComponents();
+            services.AddDomainComponents();
+            services.AddApplicationComponents();
+            services.AddInfrastructureComponents(this.configuration);
         }
 
         public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)

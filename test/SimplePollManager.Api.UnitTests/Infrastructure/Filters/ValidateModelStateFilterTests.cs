@@ -9,7 +9,7 @@ namespace SimplePollManager.Api.UnitTests.Infrastructure.Filters
     using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.AspNetCore.Routing;
     using Moq;
-    using SimplePollManager.Api.Infrastructure.Filters;
+    using SimplePollManager.Api.Filters;
     using Xunit;
 
     public class ValidateModelStateFilterTests

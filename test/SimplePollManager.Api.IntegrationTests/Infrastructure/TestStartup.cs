@@ -6,11 +6,10 @@ namespace SimplePollManager.Api.IntegrationTests.Infrastructure
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.FeatureManagement;
-    using SimplePollManager.Api.Infrastructure.Filters;
+    using SimplePollManager.Api.Filters;
     using SimplePollManager.Api.IntegrationTests.Infrastructure.DataFeeders;
-    using SimplePollManager.Core.Extensions;
-    using SimplePollManager.Database;
+    using SimplePollManager.Domain.Extensions;
+    using SimplePollManager.Infrastructure.Persistence;
 
     public class TestStartup : Startup
     {
@@ -30,11 +29,9 @@ namespace SimplePollManager.Api.IntegrationTests.Infrastructure
                 .AddDataAnnotations()
                 .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            services.AddCoreComponents();
+            services.AddDomainComponents();
 
-            services.AddFeatureManagement();
-
-            services.AddDbContext<PollContext>(options =>
+            services.AddDbContext<PollDbContext>(options =>
             {
                 options.UseInMemoryDatabase("polls");
             });
@@ -42,7 +39,7 @@ namespace SimplePollManager.Api.IntegrationTests.Infrastructure
 
         public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var pollContext = app.ApplicationServices.GetService<PollContext>();
+            var pollContext = app.ApplicationServices.GetService<PollDbContext>();
             PollContextDataFeeder.Feed(pollContext);
 
             app.UseRouting();
